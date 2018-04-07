@@ -96,6 +96,16 @@ impl KibanaLogger {
         self.merge(data);
         let _ = self.logger.err(serde_json::to_string(&self.data).unwrap());
     }
+
+    /// Logs a message into syslog with the `debug` level.
+    ///
+    /// Args:
+    ///
+    /// `data`: json dictionary to append to logged data
+    fn log_debug(&mut self, data: serde_json::Value) {
+        self.merge(data);
+        let _ = self.logger.debug(serde_json::to_string(&self.data).unwrap());
+    }
 }
 
 #[cfg(test)]
