@@ -61,7 +61,7 @@ impl KibanaLogger {
         logger
     }
 
-    /// Merge every key/value pair from the given data with the logger data.
+    /// Merge every key/value pairs from the given data object with the logger data object.
     ///
     /// Args:
     ///
@@ -80,7 +80,7 @@ impl KibanaLogger {
         );
     }
 
-    /// Merge every key/value pair from the given data with the logger data without modifying the logger data, returns a brand new JSON content
+    /// Merge every key/value pairs from the given data object with the logger data object. Does not modify the kibana logger content.
     ///
     /// Args:
     ///
@@ -88,7 +88,7 @@ impl KibanaLogger {
     ///
     /// Returns:
     ///
-    /// logger data with additional items
+    /// merged items object
     fn get_merged_data(&self, data: Value) -> Map<String, Value> {
 
         let mut logger_data = self.data.clone();

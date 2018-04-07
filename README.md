@@ -1,7 +1,7 @@
 # rust-kibana-logger
 
 Simple `syslog` crate routines wrapper for syslog logging.
-The logged data is directly usuable from ElasticSearch.
+The logged data can then be used into ElasticSearch.
 
 ## Example
 
