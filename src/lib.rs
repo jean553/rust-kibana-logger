@@ -7,11 +7,11 @@ use syslog::{
     Logger,
 };
 
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 struct KibanaLogger {
     logger: Logger,
-    data: Value,
+    data: Map<String, Value>,
 }
 
 impl KibanaLogger {
@@ -24,7 +24,16 @@ impl KibanaLogger {
     fn new() -> KibanaLogger {
         KibanaLogger {
             logger: *syslog::unix(Facility::LOG_LOCAL7).unwrap(),
-            data: json!({}),
+            data: Map::new(),
+        }
+    }
+
+    fn merge(&mut self, data: serde_json::Value) {
+        let obj = data.as_object().unwrap();
+        let itera = obj.into_iter();
+
+        for value in itera {
+            self.data.insert(value.0.to_string(), json!(value.1));
         }
     }
 
@@ -33,8 +42,9 @@ impl KibanaLogger {
     /// Args:
     ///
     /// `data`: json dictionary to append to logged data
-    fn log_info(&self, data: serde_json::Value) {
-        let _ = self.logger.info(data.to_string());
+    fn log_info(&mut self, data: serde_json::Value) {
+        self.merge(data);
+        let _ = self.logger.info(serde_json::to_string(&self.data).unwrap());
     }
 }
 
@@ -46,7 +56,8 @@ mod tests {
     #[test]
     fn test_info() {
 
-        let logger = KibanaLogger::new();
+        let mut logger = KibanaLogger::new();
         logger.log_info(json!({"step": "done"}));
+        logger.log_info(json!({"other_step": "other_done", "hello": "bonjour"}));
     }
 }
