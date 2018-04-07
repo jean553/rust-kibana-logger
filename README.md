@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/jean553/rust-kibana-logger.svg?branch=master)](https://travis-ci.org/jean553/rust-kibana-logger)
-
 # rust-kibana-logger
 
 Simple `syslog` crate routines wrapper for syslog logging.
@@ -19,4 +17,23 @@ let mut logger = logger.clone_with(json!({"api": "get_wallet_status"}));
 logger.log_info(json!({"step": "done"}));
 
 /* {"api":"get_wallet_status","app":"somekind_of_wallet_management_app","step":"done"} */
+```
+
+## Development
+
+```sh
+vagrant up
+vagrant ssh
+```
+
+## Run tests
+
+```sh
+cargo test
+```
+
+## Generate documentation
+
+```sh
+cargo rustdoc -- --document-private-items
 ```
