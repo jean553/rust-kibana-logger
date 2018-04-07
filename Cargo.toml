@@ -5,3 +5,7 @@ authors = ["Jean LELIEVRE <Jean.LELIEVRE@supinfo.com>"]
 
 [dependencies]
 syslog = "*"
+
+[lib]
+name = "rust_kibana_logger"
+path = "src/lib.rs"
