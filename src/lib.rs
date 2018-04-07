@@ -86,6 +86,16 @@ impl KibanaLogger {
         self.merge(data);
         let _ = self.logger.warning(serde_json::to_string(&self.data).unwrap());
     }
+
+    /// Logs a message into syslog with the `error` level.
+    ///
+    /// Args:
+    ///
+    /// `data`: json dictionary to append to logged data
+    fn log_error(&mut self, data: serde_json::Value) {
+        self.merge(data);
+        let _ = self.logger.err(serde_json::to_string(&self.data).unwrap());
+    }
 }
 
 #[cfg(test)]
