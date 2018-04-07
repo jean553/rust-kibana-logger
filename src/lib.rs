@@ -1,5 +1,7 @@
 extern crate syslog;
 
+#[macro_use] extern crate serde_json;
+
 use syslog::{
     Facility,
     Logger,
@@ -9,7 +11,7 @@ pub trait KibanaLogger {
 
     fn new() -> Logger;
 
-    fn log_info(&self);
+    fn log_info(&self, data: serde_json::Value);
 }
 
 impl KibanaLogger for Logger {
@@ -25,9 +27,11 @@ impl KibanaLogger for Logger {
 
     /// Logs a message into syslog with the `info` level.
     ///
-    /// TODO: should take a JSON object as parameter
-    fn log_info(&self) {
-        let _ = self.info("a log message");
+    /// Args:
+    ///
+    /// `data`: json dictionary to append to logged data
+    fn log_info(&self, data: serde_json::Value) {
+        let _ = self.info(data.to_string());
     }
 }
 
@@ -43,6 +47,6 @@ mod tests {
     fn test_info() {
 
         let logger = Logger::new();
-        logger.log_info();
+        logger.log_info(json!({"step": "done"}));
     }
 }
