@@ -5,9 +5,14 @@ extern crate syslog;
 use syslog::{
     Facility,
     Logger,
+    unix,
 };
 
-use serde_json::{Map, Value};
+use serde_json::{
+    Map,
+    Value,
+    to_string,
+};
 
 struct KibanaLogger {
     logger: Logger,
@@ -18,14 +23,22 @@ impl KibanaLogger {
 
     /// Creates a new syslog logger object.
     ///
+    /// Args:
+    ///
+    /// `data` - default JSON data of the logger
+    ///
     /// Returns:
     ///
     /// kibana logger
-    fn new() -> KibanaLogger {
-        KibanaLogger {
-            logger: *syslog::unix(Facility::LOG_LOCAL7).unwrap(),
+    fn new(data: Value) -> KibanaLogger {
+        let mut logger = KibanaLogger {
+            logger: *unix(Facility::LOG_LOCAL7).unwrap(),
             data: Map::new(),
-        }
+        };
+
+        logger.merge(data);
+
+        logger
     }
 
     /// Creates a brand new kibana logger object from the existing one.
@@ -37,11 +50,11 @@ impl KibanaLogger {
     /// Returns:
     ///
     /// kibana logger with the previous one items and the added items
-    fn clone_with(&self, data: serde_json::Value) -> KibanaLogger {
+    fn clone_with(&self, data: Value) -> KibanaLogger {
 
         /* syslog::Logger does not implement copy traits,
            so we simply create a new one and clone its data */
-        let mut logger = KibanaLogger::new();
+        let mut logger = KibanaLogger::new(json!({}));
         logger.data = self.data.clone();
 
         logger.merge(data);
@@ -53,7 +66,7 @@ impl KibanaLogger {
     /// Args:
     ///
     /// `data` - the JSON data to merge
-    fn merge(&mut self, data: serde_json::Value) {
+    fn merge(&mut self, data: Value) {
 
         data.as_object()
             .unwrap()
@@ -72,9 +85,9 @@ impl KibanaLogger {
     /// Args:
     ///
     /// `data`: json dictionary to append to logged data
-    fn log_info(&mut self, data: serde_json::Value) {
+    fn log_info(&mut self, data: Value) {
         self.merge(data);
-        let _ = self.logger.info(serde_json::to_string(&self.data).unwrap());
+        let _ = self.logger.info(to_string(&self.data).unwrap());
     }
 
     /// Logs a message into syslog with the `warning` level.
@@ -82,9 +95,9 @@ impl KibanaLogger {
     /// Args:
     ///
     /// `data`: json dictionary to append to logged data
-    fn log_warning(&mut self, data: serde_json::Value) {
+    fn log_warning(&mut self, data: Value) {
         self.merge(data);
-        let _ = self.logger.warning(serde_json::to_string(&self.data).unwrap());
+        let _ = self.logger.warning(to_string(&self.data).unwrap());
     }
 
     /// Logs a message into syslog with the `error` level.
@@ -92,9 +105,9 @@ impl KibanaLogger {
     /// Args:
     ///
     /// `data`: json dictionary to append to logged data
-    fn log_error(&mut self, data: serde_json::Value) {
+    fn log_error(&mut self, data: Value) {
         self.merge(data);
-        let _ = self.logger.err(serde_json::to_string(&self.data).unwrap());
+        let _ = self.logger.err(to_string(&self.data).unwrap());
     }
 
     /// Logs a message into syslog with the `debug` level.
@@ -102,9 +115,9 @@ impl KibanaLogger {
     /// Args:
     ///
     /// `data`: json dictionary to append to logged data
-    fn log_debug(&mut self, data: serde_json::Value) {
+    fn log_debug(&mut self, data: Value) {
         self.merge(data);
-        let _ = self.logger.debug(serde_json::to_string(&self.data).unwrap());
+        let _ = self.logger.debug(to_string(&self.data).unwrap());
     }
 
     /// Logs a message into syslog with the `critical` level.
@@ -112,9 +125,9 @@ impl KibanaLogger {
     /// Args:
     ///
     /// `data`: json dictionary to append to logged data
-    fn log_critical(&mut self, data: serde_json::Value) {
+    fn log_critical(&mut self, data: Value) {
         self.merge(data);
-        let _ = self.logger.crit(serde_json::to_string(&self.data).unwrap());
+        let _ = self.logger.crit(to_string(&self.data).unwrap());
     }
 }
 
@@ -128,12 +141,16 @@ mod tests {
     #[test]
     fn test_clone_with_and_log_info() {
 
-        /* should output '{"api": "get_books", "action": "call_database", "step": "done"}' */
+        let mut logger = KibanaLogger::new(json!({"app": "my_app"}));
 
-        let mut logger = KibanaLogger::new();
+        /* should output '{"app": "my_app", "api": "get_books"}' */
+
         logger.log_info(json!({"api": "get_books"}));
 
         let mut other_logger = logger.clone_with(json!({"action": "call_database"}));
+
+        /* should output '{"app": "my_app", "api": "get_books", "action": "call_database", "step": "done"}' */
+
         other_logger.log_info(json!({"step": "done"}));
     }
 }
