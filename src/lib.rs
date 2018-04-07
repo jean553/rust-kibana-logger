@@ -28,8 +28,19 @@ impl KibanaLogger {
         }
     }
 
+    /// Creates a brand new kibana logger object from the existing one.
+    ///
+    /// Args:
+    ///
+    /// `data` - the JSON data to insert into the new kibana logger
+    ///
+    /// Returns:
+    ///
+    /// kibana logger with the previous one items and the added items
     fn clone_with(&self, data: serde_json::Value) -> KibanaLogger {
 
+        /* syslog::Logger does not implement copy traits,
+           so we simply create a new one and clone its data */
         let mut logger = KibanaLogger::new();
         logger.data = self.data.clone();
 
@@ -70,13 +81,19 @@ impl KibanaLogger {
 #[cfg(test)]
 mod tests {
 
+    /* NOTE: check /var/log/syslog content to check if it works */
+
     use KibanaLogger;
 
     #[test]
-    fn test_info() {
+    fn test_clone_with_and_log_info() {
+
+        /* should output '{"api": "get_books", "action": "call_database", "step": "done"}' */
 
         let mut logger = KibanaLogger::new();
-        let mut other_logger = logger.clone_with(json!({"first": "second"}));
+        logger.log_info(json!({"api": "get_books"}));
+
+        let mut other_logger = logger.clone_with(json!({"action": "call_database"}));
         other_logger.log_info(json!({"step": "done"}));
     }
 }
