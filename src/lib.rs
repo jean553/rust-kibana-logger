@@ -7,22 +7,25 @@ use syslog::{
     Logger,
 };
 
-pub trait KibanaLogger {
+use serde_json::Value;
 
-    fn new() -> Logger;
-
-    fn log_info(&self, data: serde_json::Value);
+struct KibanaLogger {
+    logger: Logger,
+    data: Value,
 }
 
-impl KibanaLogger for Logger {
+impl KibanaLogger {
 
     /// Creates a new syslog logger object.
     ///
     /// Returns:
     ///
-    /// syslog logger
-    fn new() -> Logger {
-        *syslog::unix(Facility::LOG_LOCAL7).unwrap()
+    /// kibana logger
+    fn new() -> KibanaLogger {
+        KibanaLogger {
+            logger: *syslog::unix(Facility::LOG_LOCAL7).unwrap(),
+            data: json!({}),
+        }
     }
 
     /// Logs a message into syslog with the `info` level.
@@ -31,22 +34,19 @@ impl KibanaLogger for Logger {
     ///
     /// `data`: json dictionary to append to logged data
     fn log_info(&self, data: serde_json::Value) {
-        let _ = self.info(data.to_string());
+        let _ = self.logger.info(data.to_string());
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    /* TODO: we should use only one external object */
-
     use KibanaLogger;
-    use syslog::Logger;
 
     #[test]
     fn test_info() {
 
-        let logger = Logger::new();
+        let logger = KibanaLogger::new();
         logger.log_info(json!({"step": "done"}));
     }
 }
