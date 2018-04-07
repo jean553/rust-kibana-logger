@@ -18,14 +18,22 @@ impl KibanaLogger {
 
     /// Creates a new syslog logger object.
     ///
+    /// Args:
+    ///
+    /// `data` - default JSON data of the logger
+    ///
     /// Returns:
     ///
     /// kibana logger
-    fn new() -> KibanaLogger {
-        KibanaLogger {
+    fn new(data: Value) -> KibanaLogger {
+        let mut logger = KibanaLogger {
             logger: *syslog::unix(Facility::LOG_LOCAL7).unwrap(),
             data: Map::new(),
-        }
+        };
+
+        logger.merge(data);
+
+        return logger;
     }
 
     /// Creates a brand new kibana logger object from the existing one.
@@ -41,7 +49,7 @@ impl KibanaLogger {
 
         /* syslog::Logger does not implement copy traits,
            so we simply create a new one and clone its data */
-        let mut logger = KibanaLogger::new();
+        let mut logger = KibanaLogger::new(json!({}));
         logger.data = self.data.clone();
 
         logger.merge(data);
@@ -128,12 +136,16 @@ mod tests {
     #[test]
     fn test_clone_with_and_log_info() {
 
-        /* should output '{"api": "get_books", "action": "call_database", "step": "done"}' */
+        let mut logger = KibanaLogger::new(json!({"app": "my_app"}));
 
-        let mut logger = KibanaLogger::new();
+        /* should output '{"app": "my_app", "api": "get_books"}' */
+
         logger.log_info(json!({"api": "get_books"}));
 
         let mut other_logger = logger.clone_with(json!({"action": "call_database"}));
+
+        /* should output '{"app": "my_app", "api": "get_books", "action": "call_database", "step": "done"}' */
+
         other_logger.log_info(json!({"step": "done"}));
     }
 }
