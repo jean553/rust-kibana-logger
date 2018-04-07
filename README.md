@@ -20,3 +20,22 @@ logger.log_info(json!({"step": "done"}));
 
 /* {"api":"get_wallet_status","app":"somekind_of_wallet_management_app","step":"done"} */
 ```
+
+## Development
+
+```sh
+vagrant up
+vagrant ssh
+```
+
+## Run tests
+
+```sh
+cargo test
+```
+
+## Generate documentation
+
+```sh
+cargo rustdoc -- --document-private-items
+```
