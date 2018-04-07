@@ -1,10 +1,11 @@
 [package]
 name = "rust-kibana-logger"
 version = "0.1.0"
-authors = ["Jean LELIEVRE <Jean.LELIEVRE@supinfo.com>"]
+authors = ["Jean LELIEVRE"]
 
 [dependencies]
 syslog = "*"
+serde_json = "*"
 
 [lib]
 name = "rust_kibana_logger"
