@@ -61,7 +61,7 @@ impl KibanaLogger {
         logger
     }
 
-    /// Merge every key/value pair from the given data to the logger data.
+    /// Merge every key/value pair from the given data with the logger data.
     ///
     /// Args:
     ///
@@ -80,14 +80,41 @@ impl KibanaLogger {
         );
     }
 
+    /// Merge every key/value pair from the given data with the logger data without modifying the logger data, returns a brand new JSON content
+    ///
+    /// Args:
+    ///
+    /// `data` - the JSON data to merge
+    ///
+    /// Returns:
+    ///
+    /// logger data with additional items
+    fn get_merged_data(&self, data: Value) -> Map<String, Value> {
+
+        let mut logger_data = self.data.clone();
+
+        data.as_object()
+            .unwrap()
+            .into_iter()
+            .for_each(|(key, value)| {
+                logger_data.insert(
+                    key.to_string(),
+                    json!(value),
+                );
+            }
+        );
+
+        logger_data
+    }
+
     /// Logs a message into syslog with the `info` level.
     ///
     /// Args:
     ///
     /// `data`: json dictionary to append to logged data
     fn log_info(&mut self, data: Value) {
-        self.merge(data);
-        let _ = self.logger.info(to_string(&self.data).unwrap());
+        let data = self.get_merged_data(data);
+        let _ = self.logger.info(to_string(&data).unwrap());
     }
 
     /// Logs a message into syslog with the `warning` level.
@@ -96,8 +123,8 @@ impl KibanaLogger {
     ///
     /// `data`: json dictionary to append to logged data
     fn log_warning(&mut self, data: Value) {
-        self.merge(data);
-        let _ = self.logger.warning(to_string(&self.data).unwrap());
+        let data = self.get_merged_data(data);
+        let _ = self.logger.warning(to_string(&data).unwrap());
     }
 
     /// Logs a message into syslog with the `error` level.
@@ -106,8 +133,8 @@ impl KibanaLogger {
     ///
     /// `data`: json dictionary to append to logged data
     fn log_error(&mut self, data: Value) {
-        self.merge(data);
-        let _ = self.logger.err(to_string(&self.data).unwrap());
+        let data = self.get_merged_data(data);
+        let _ = self.logger.err(to_string(&data).unwrap());
     }
 
     /// Logs a message into syslog with the `debug` level.
@@ -116,8 +143,8 @@ impl KibanaLogger {
     ///
     /// `data`: json dictionary to append to logged data
     fn log_debug(&mut self, data: Value) {
-        self.merge(data);
-        let _ = self.logger.debug(to_string(&self.data).unwrap());
+        let data = self.get_merged_data(data);
+        let _ = self.logger.debug(to_string(&data).unwrap());
     }
 
     /// Logs a message into syslog with the `critical` level.
@@ -126,8 +153,8 @@ impl KibanaLogger {
     ///
     /// `data`: json dictionary to append to logged data
     fn log_critical(&mut self, data: Value) {
-        self.merge(data);
-        let _ = self.logger.crit(to_string(&self.data).unwrap());
+        let data = self.get_merged_data(data);
+        let _ = self.logger.crit(to_string(&data).unwrap());
     }
 }
 
@@ -141,16 +168,10 @@ mod tests {
     #[test]
     fn test_clone_with_and_log_info() {
 
-        let mut logger = KibanaLogger::new(json!({"app": "my_app"}));
+        let mut logger = KibanaLogger::new(json!({"app": "somekind_of_wallet_management_app"}));
+        logger.log_info(json!({"step": "database_connection", "status": "it_works"}));
 
-        /* should output '{"app": "my_app", "api": "get_books"}' */
-
-        logger.log_info(json!({"api": "get_books"}));
-
-        let mut other_logger = logger.clone_with(json!({"action": "call_database"}));
-
-        /* should output '{"app": "my_app", "api": "get_books", "action": "call_database", "step": "done"}' */
-
-        other_logger.log_info(json!({"step": "done"}));
+        let mut logger = logger.clone_with(json!({"api": "get_wallet_status"}));
+        logger.log_info(json!({"step": "done"}));
     }
 }
