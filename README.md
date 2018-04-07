@@ -6,6 +6,8 @@ The logged data is directly usuable from ElasticSearch.
 ## Example
 
 ```rust
-let logger = Logger::new();
-logger.log_info();
+use KibanaLogger;
+
+let logger = KibanaLogger::new();
+logger.log_info(json({"step": "done"}));
 ```
