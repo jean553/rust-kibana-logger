@@ -30,13 +30,16 @@ impl KibanaLogger {
 
     fn merge(&mut self, data: serde_json::Value) {
 
-        for value in data.as_object().unwrap().into_iter() {
-
-            self.data.insert(
-                value.0.to_string(),
-                json!(value.1),
-            );
-        }
+        data.as_object()
+            .unwrap()
+            .into_iter()
+            .for_each(|(key, value)| {
+                self.data.insert(
+                    key.to_string(),
+                    json!(value),
+                );
+            }
+        );
     }
 
     /// Logs a message into syslog with the `info` level.
