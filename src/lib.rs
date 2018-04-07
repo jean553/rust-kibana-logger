@@ -29,11 +29,13 @@ impl KibanaLogger {
     }
 
     fn merge(&mut self, data: serde_json::Value) {
-        let obj = data.as_object().unwrap();
-        let itera = obj.into_iter();
 
-        for value in itera {
-            self.data.insert(value.0.to_string(), json!(value.1));
+        for value in data.as_object().unwrap().into_iter() {
+
+            self.data.insert(
+                value.0.to_string(),
+                json!(value.1),
+            );
         }
     }
 
