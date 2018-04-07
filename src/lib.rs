@@ -28,6 +28,20 @@ impl KibanaLogger {
         }
     }
 
+    fn clone_with(&self, data: serde_json::Value) -> KibanaLogger {
+
+        let mut logger = KibanaLogger::new();
+        logger.data = self.data.clone();
+
+        logger.merge(data);
+        logger
+    }
+
+    /// Merge every key/value pair from the given data to the logger data.
+    ///
+    /// Args:
+    ///
+    /// `data` - the JSON data to merge
     fn merge(&mut self, data: serde_json::Value) {
 
         data.as_object()
@@ -62,7 +76,7 @@ mod tests {
     fn test_info() {
 
         let mut logger = KibanaLogger::new();
-        logger.log_info(json!({"step": "done"}));
-        logger.log_info(json!({"other_step": "other_done", "hello": "bonjour"}));
+        let mut other_logger = logger.clone_with(json!({"first": "second"}));
+        other_logger.log_info(json!({"step": "done"}));
     }
 }
