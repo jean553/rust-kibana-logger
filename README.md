@@ -1,7 +1,9 @@
+[![Build Status](https://travis-ci.org/jean553/rust-kibana-logger.svg?branch=master)](https://travis-ci.org/jean553/rust-kibana-logger)
+
 # rust-kibana-logger
 
 Simple `syslog` crate routines wrapper for syslog logging.
-The logged data is directly usuable from ElasticSearch.
+The logged data can then be used into ElasticSearch.
 
 ## Example
 
