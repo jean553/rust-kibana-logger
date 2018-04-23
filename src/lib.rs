@@ -1,3 +1,5 @@
+#[allow(dead_code)]
+
 extern crate syslog;
 
 #[macro_use] extern crate serde_json;
@@ -17,6 +19,20 @@ use serde_json::{
 struct KibanaLogger {
     logger: Logger,
     data: Map<String, Value>,
+}
+
+/// Format the given log string with CEE structured data token
+/// (provide structured data for syslog messages)
+///
+/// Args:
+///
+/// `data` - the data to log (as string)
+///
+/// Returns:
+///
+/// log with CEE token
+fn format_cee(data: String) -> String {
+    format!("@cee: {}", data)
 }
 
 impl KibanaLogger {
@@ -114,7 +130,8 @@ impl KibanaLogger {
     /// `data`: json dictionary to append to logged data
     fn log_info(&mut self, data: Value) {
         let data = self.get_merged_data(data);
-        let _ = self.logger.info(to_string(&data).unwrap());
+        let data = format_cee(to_string(&data).unwrap());
+        let _ = self.logger.info(data);
     }
 
     /// Logs a message into syslog with the `warning` level.
@@ -124,7 +141,8 @@ impl KibanaLogger {
     /// `data`: json dictionary to append to logged data
     fn log_warning(&mut self, data: Value) {
         let data = self.get_merged_data(data);
-        let _ = self.logger.warning(to_string(&data).unwrap());
+        let data = format_cee(to_string(&data).unwrap());
+        let _ = self.logger.warning(data);
     }
 
     /// Logs a message into syslog with the `error` level.
@@ -134,7 +152,8 @@ impl KibanaLogger {
     /// `data`: json dictionary to append to logged data
     fn log_error(&mut self, data: Value) {
         let data = self.get_merged_data(data);
-        let _ = self.logger.err(to_string(&data).unwrap());
+        let data = format_cee(to_string(&data).unwrap());
+        let _ = self.logger.err(data);
     }
 
     /// Logs a message into syslog with the `debug` level.
@@ -144,7 +163,8 @@ impl KibanaLogger {
     /// `data`: json dictionary to append to logged data
     fn log_debug(&mut self, data: Value) {
         let data = self.get_merged_data(data);
-        let _ = self.logger.debug(to_string(&data).unwrap());
+        let data = format_cee(to_string(&data).unwrap());
+        let _ = self.logger.debug(data);
     }
 
     /// Logs a message into syslog with the `critical` level.
@@ -154,7 +174,8 @@ impl KibanaLogger {
     /// `data`: json dictionary to append to logged data
     fn log_critical(&mut self, data: Value) {
         let data = self.get_merged_data(data);
-        let _ = self.logger.crit(to_string(&data).unwrap());
+        let data = format_cee(to_string(&data).unwrap());
+        let _ = self.logger.crit(data);
     }
 }
 
