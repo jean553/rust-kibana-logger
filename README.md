@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jean553/rust-kibana-logger.svg?branch=master)](https://travis-ci.org/jean553/rust-kibana-logger)
+
 # rust-kibana-logger
 
 Simple `syslog` crate routines wrapper for syslog logging.
